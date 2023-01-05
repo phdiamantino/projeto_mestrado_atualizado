@@ -1,0 +1,383 @@
+.my-select {
+  padding: 5px 65px;
+  font-size: 17px;
+  /*background: -webkit-gradient(linear, left top, left 25, from(#FFFFFF), color-stop(4%, #7a868b), to(#FFFFFF)); 
+*/
+  cursor: pointer; 
+}
+
+
+rect.selection {
+  stroke: rgb(59, 53, 53);
+  stroke-width: 1;
+}
+
+.extent {
+  fill-opacity: .3;
+  stroke: #fff;
+
+  shape-rendering: geometricPrecision;
+}
+
+path:hover { 
+  stroke:rgb(0, 26, 255);
+  stroke-width: 2;
+  cursor: pointer;
+  opacity: 1;
+}
+
+line {
+    fill: none;
+    stroke: #00ff73;
+    stroke-width: 2;
+}
+
+#versions {
+    background-color: grey;
+    width:10;
+    height:20;
+}
+.ol-popup h1 {
+  font-size: 2em;
+  color: #369;
+}
+
+.link {
+	fill: none;
+	stroke: #555;
+	stroke-opacity: 0.4;
+	stroke-width: 1.5px;
+}
+
+.chart { 
+    background: #fff;
+  }
+  
+.axis path, .axis line {
+    fill: none;
+    stroke: #000;
+    stroke-width: 2px;
+    shape-rendering: geometricPrecision;
+  }
+  
+button {
+    position: absolute;
+    right: 50px;
+    top: 30px;
+  }
+
+
+p {
+  font: 11px Verdana;
+}
+
+#sumburst { 
+  position: relative ;
+  overflow: auto;
+  /*resize: both;*/
+}
+#sumburst path { 
+  stroke: rgb(76, 76, 76);
+  fill: none;
+  cursor: pointer;
+}
+
+#sumburst path:hover { 
+    stroke:rgb(0, 26, 255);
+    stroke-width: 2;
+    cursor: pointer;
+    opacity: 1;
+}
+
+
+#multidimencionalProjection { 
+  position: relative ;
+  overflow: auto;
+  /*resize: both;*/
+  /*background-color: rgb(218, 223, 149);
+  border: 1px solid rgb(37, 167, 54);*/
+}
+
+
+#multidimencionalProjectionTable {    
+	position: absolute; /*relative*/
+  overflow: auto;
+	top: 660px; 
+  left: 240px; 
+  width: 820px;
+  height: 150px;
+  background-color: white;
+  border: 1px solid black;
+  
+}
+/*table {      
+  margin-right: 3px;
+  width: 100%;}*/
+th { 
+  text-align: center;
+  font-family: sans-serif;
+  font-size: 0.75em; 
+  background: #212529;
+  color: white;
+  height: 20px;
+  width: 100%;
+  border: 1px solid rgb(27, 26, 26); 
+}
+td{
+  white-space: initial;
+  padding: 1px 5px;                                   
+  font-size: 0.6em; 
+  font-family: sans-serif;
+}
+
+ td{
+  border: 1px solid gold;
+  border-collapse: collapse;
+  border-style: hidden;
+}
+
+tr:nth-child(even) {
+  background-color: #e7e6e6; /*deixa a tabela cor sim, cor não*/
+}
+
+
+#parallelCordinates {    
+	position: relative ;
+  overflow: auto;
+  /*resize: both;*/
+}
+/*#parallelCordinates path { 
+  stroke: grey;
+  stroke-width: 1.5;
+  fill: none;
+  cursor: pointer;
+  opacity: 0.6;
+}*/
+#parallelCordinates path:hover { 
+  stroke-width: 2.5;
+  stroke:rgb(0, 26, 255);
+  cursor: pointer;
+  opacity: 1;
+}
+
+.foreground path {
+  fill: none;
+  stroke: grey;
+  stroke-width: 1.5;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.foreground path:hover{ 
+  stroke:rgb(0, 26, 255);
+  stroke-width: 2.3;
+  opacity: 1;
+}
+
+
+
+#themeRiver {   
+  position: relative;
+  overflow: hidden; 
+  /*resize: both;*/
+	/*border: 1px solid black;*/
+}
+
+#barGraph {
+  position: absolute; 
+  border: 0.5px solid black;
+  background-color:rgb(211, 208, 208);
+  left: 100%; 
+  margin-left: -80px; 
+  top: 50%; 
+  margin-top: -80px;
+  /*width: 12%; 
+  height: 65%;*/
+  width: 65px; 
+  height: 195px;
+  padding: -5px;
+}
+
+#barGraph path { 
+  stroke: rgb(23, 23, 23);
+  stroke-width: 1;
+  opacity: 0.6; }
+#barGraph line {
+  stroke: rgb(23, 23, 23);
+  stroke-width: 2;}
+
+
+#themeriver path { 
+  stroke: rgb(104, 104, 104);
+  stroke-width: 1.5;
+  fill: none;
+  cursor: pointer;
+  opacity: 0.6;
+}
+#legend_tr {
+  -webkit-filter: drop-shadow( 3px 3px 2px rgba(54, 51, 51, 0.7));
+  filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
+  /* Similar syntax to box-shadow */
+}
+/* BOTTOM SELECT THEMERIVER */
+#custom-select-tr {
+  position: relative;
+  top:1px;
+  left:-5px;
+  padding: 1px;
+  font-size: 13px;
+  /*overflow: hidden;
+  display: inline-block;*/
+  cursor: pointer;
+}
+.custom-select-tr{
+  background-color: #f1f1f1;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+
+.custom-select-tr select {
+  display: default; /*hide original SELECT element: */
+}
+.custom-select-tr select {
+  display: default; /*hide original SELECT element: */
+}
+
+.select-selected {
+  background-color: DodgerBlue;
+  padding: 10px;
+  cursor: pointer;
+}
+.select-selected:after {
+  position: absolute;
+  content: "";
+  top: 14px;
+  right: 10px;
+  width: 0;
+  height: 0;
+  border: 6px solid transparent;
+  border-color: #fff transparent transparent transparent;
+}
+/* Point the arrow upwards when the select box is open (active): */
+.select-selected.select-arrow-active:after {
+  border-color: transparent transparent #fff transparent;
+  top: 7px;
+}
+/* style the items (options), including the selected item: */
+.select-items div,.select-selected {
+  color: #ffffff;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+  cursor: pointer;
+}
+/* Style items (options): */
+.select-items {
+  position: absolute;
+  background-color: DodgerBlue;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  cursor: pointer;
+}
+/* Hide the items when the select box is closed: */
+.select-hide {
+  display: none;
+  cursor: pointer;
+}
+
+.form {
+  position: relative;
+  top:7px;
+  left:40px;
+  padding: 2px;
+  overflow: hidden;
+  display: inline-block;
+  cursor: pointer;
+}
+
+form {
+  position: absolute;
+  left: 10px;
+  top: 38px;
+   font-size: 13px;
+}
+
+
+/* Sidebar */
+#sidebar {    
+	position:absolute;
+  fill: rgb(65, 22, 94);
+}
+
+/*.navbar{
+  background:Teal;
+}
+#sidebar-wrapper{
+  background:Teal;
+}*/
+
+
+.toolTip {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  position: absolute;
+  display: none;
+  width: auto;
+  height: auto;
+  background: none repeat scroll 0 0 white;
+  border: 0 none;
+  border-radius: 8px 8px 8px 8px;
+  box-shadow: -3px 3px 15px #888888;
+  color: black;
+  font: 11px sans-serif;
+  padding: 5px;
+  text-align: center;
+}
+
+
+
+
+/* RESIZING */
+
+html {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  min-height: 100vh;
+  padding-top: 55px;
+}
+
+.flex-fill {
+ flex:1 1 auto;
+}
+
+@media (min-width: 768px) {
+  .left {
+      position:fixed;
+  }
+  .fixed {
+      min-height: 100vh;
+      min-width: 180px;
+      max-width: 180px
+  }
+  .col .fluid {
+     min-height: 100vh;
+  }
+}
+
+/*
+.gutter {
+  z-index: 20;
+  position:relative;
+  background-color: #222;
+  cursor: col-resize;
+  box-shadow: 2px 1px rgba(70,70,40,0.3);
+}
+
+.gutter-vertical {
+  cursor: row-resize;
+  box-shadow: 1px 2px rgba(40,40,40,0.3);
+}*/

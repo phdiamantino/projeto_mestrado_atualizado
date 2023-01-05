@@ -1,0 +1,171 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- D3-->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+      <script>  
+        d3v4 = window.d3;
+        window.d3 = null;</script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src='https://raw.githack.com/karpathy/tsnejs/master/tsne.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.13.0/d3-legend.js"></script>
+    <!-- TSNE-->
+    <script src="tsne.min.js"></script>
+    <script src="worker.js"></script>
+    <!-- Bootstrap-->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>  
+    <link rel="stylesheet" href="css/style.css"></link>
+    <!-- Fonte / ProgressBar / Parallax-->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/fontawesome.min.css" integrity="sha384-wESLQ85D6gbsF459vf1CiZ2+rr+CsxRY0RpiF1tLlQpDnAgg6rwdsUF1+Ics2bni" crossorigin="anonymous">
+    <script src="css/progressbar.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/parallax.js/1.4.2/parallax.min.js"></script>
+    
+    <script src ="https://kit.fontawesome.com/bf7e05c402.js"  crossorigin="anonymous"></script>
+    
+  
+    <title>About Us</title>
+</head>
+
+<body>
+  <header>    
+    <div class="cont" id="nav-cont">
+      <nav class="navbar navbar-expand-lg fixed-top">
+        <a href="index.html" class="navbar-brand"> 
+          <!--<img id="logo" src="img/logo.png" alt="logo">-->
+          .   Dashboard
+        </a> <!-- <h2>Logo App</h2> -->
+        <button class="navbar-toggler" type="button" data-toggle="colapse" data-target="#navbar-links" 
+          aria-controls="navbar-links" aria-expanded="false" aria-label="Toogle navigation">
+          <span class="navbar-toogler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbar-links"> 
+          <div class="navbar-nav">
+            <!--<a class="nav-link active" aria-current="page" href="#">Home</a>-->
+            <a class="nav-item nav-link" id="about-menu" href="#">About</a>
+          </div>
+        </div>
+      </nav>
+    </div> 
+  </header>
+  <main>
+    <div class="cont-fluid">
+      <div id="about-area">
+        <!-- Seção Dashboard -->
+        <div class="cont">
+          <div class="row">
+            <div class="col-12">
+              <h3 class="main-title">Visual Debts Analytics</h3>
+            </div>
+            <div class="col-md-6">
+              <img class="img-fluid" src="img/Screenshot.png" alt="logos">
+            </div>
+            <div class="col-md-6">
+              <h5 class="text-dark">This work presents a Visual Analytics approach using multiple 
+                    interactive coordinate multidimensional views to monitor different aspects of up 
+                    to 12 types of Technical Debts in software repositories.
+                    <h5 class="text-dark">These aspects are:</h5></h5>
+              <ul id="about-list">
+                <p><i class="fas fa-check"></i>  General architecture of debt items in the project;</p>
+                <p><i class="fas fa-check"></i>  Debt evolution over the versions;</p>
+                <p><i class="fas fa-check"></i>  >Qualitative aspects of the project;</p>
+                <p><i class="fas fa-check"></i>  Relationship between specific debt groups;</p>
+                <p><i class="fas fa-check"></i>  Low-dimensional representation of complex data provided by the repository;</p>
+                <p><i class="fas fa-check"></i>  Employee sentiment analysis regarding the quality and evolution of debts;</p>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Seção Vis -->
+      <div id="vis-area">
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <h3 class="main-title">About Views</h3>
+            </div>
+                <div class="col-md-3">
+                  <div class="card">
+                    <img src="img/sb.png" class="card-img-top" alt="Vis1">
+                    <div class="card-body">
+                      <h5 class="card-title">Sunburst</h5>
+                      <p class="card-text"> 
+                        A powerful way to demonstrate part to entire relationships. 
+                        Allow a quick understanding of deeply nested systems. 
+                        This can be useful for understanding group distributions and hierarchical systems,
+                         presented as data in a tree-like structure.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-3" >
+                  <div class="card">
+                    <img src="img/mp.png" class="card-img-top" alt="Vis2">
+                    <div class="card-body">
+                      <h5 class="card-title">Multidimensional Projection (t-SNE)</h5>
+                      <p class="card-text"> Visual analysis of multidimensional data relies on reducing the dimensionality of the data to visually encode it.
+                         Multidimensional projections are among the most important visualization techniques 
+                         in this context, transforming such large and complex (multidimensional) data sets 
+                         into scatter plots where patterns reflect some notion of similarity in the data.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="card">
+                    <img src="img/tr.png" class="card-img-top" alt="Vis3">
+                    <div class="card-body">
+                      <h5 class="card-title">Theme River</h5>
+                      <p class="card-text"> 
+                        ThemeRiver visualizes specific variations over time within the dataset. 
+                        The “river” flows from left to right over time (X-axis), changing in width to represent changes in the thematic 
+                        strength of the temporally associated data (Y-axis). The colored “currents” 
+                        that “flow” within the river narrow or widen to indicate a decrease or increase in the strength of a given topic.
+                        And the mouseover presents additional information from these flows.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="card">
+                    <img src="img/pc.png" class="card-img-top" alt="Vis4">
+                    <div class="card-body">
+                      <h5 class="card-title">Parallel Coordinates </h5>
+                      <p class="card-text"> Parallel Coordinates allows you to compare the characteristic of the data in a set of numerical variables. 
+                        To show a set of points in n-dimensional space, a backdrop is drawn consisting of 
+                        x parallel lines, normally vertical and equally spaced. 
+                        Each vertical bar represents a variable with its own scale. 
+                        The values are then plotted as a series of connected lines on each axis (time dimension in this case).</p>
+                    </div>
+                  </div>
+                </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <div id="rodape">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <h3> Contact Us</h3>
+          </div>
+          <div class="col-md-12 contact-box">
+            <i class="fas fa-envelope"></i>
+            <p><span class="contact-title">e-mail:</span> pdiamantino@ufba.br </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>  
+  </div>
+  <link rel="stylesheet" href="style.css"></link>
+  </div>
+</body> 
+
+</html>

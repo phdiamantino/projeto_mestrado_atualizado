@@ -1,0 +1,240 @@
+body {
+  font-family: 'Roboto', sans-serif;
+}
+.row{
+  margin:0;
+}
+
+h2{
+  color: white;
+}
+
+h3{
+  color: #444;
+}
+
+.cont{
+  padding:70px 0;
+}
+
+p, li{
+  font-family: sans-serif;
+  color:#444;
+  font-size:17px;
+}
+
+/*body {
+  background-color: lightblue;
+}*/
+
+
+/* Header */
+header, .navbar {
+  background-color: #444
+}
+
+#nav-cont{
+  padding-top:0;
+  padding-bottom:0;
+}
+
+#logo {
+  width: 55px;
+}
+
+.navbar-brand{
+  padding:0;
+  color: #fff;}
+.navbar-brand:hover{
+    color: #fff;}
+#navbar-links a {
+    color: #fff;}
+.navbar-expand-lg #navbar-nav .nav-link{
+  padding: 12rem .8rem;
+}
+
+
+/* PAGINA ABOUT*/
+/*#about-area {
+  background-color:antiquewhite
+}*/
+
+.main-title {
+  color:444;
+  margin: 0 0 65px 0;
+  font-size: 40px;
+  text-align:center;
+}
+
+.main-title::after {
+  content:"";
+  border-top:2px solid #333;
+  position:absolute;
+  width:15%;
+  top:120px;
+  left: 42.5%;
+}
+
+
+.about-title{
+  font-size:18px;
+  color:#444;
+  text-transform:uppercase;
+  font-weight:bold;
+}
+
+
+#abouttext {
+  font-size: 17px;
+}
+
+#about-list li{
+  line-height: 30px;
+}
+
+#about-list i{
+  color: #0a2c17;
+  margin-right: 15px; 
+}
+
+/* Time About */
+/*#vis-area {
+  background-color:antiquewhite
+}*/
+
+.card-body{
+  text-align:center;
+}
+
+/* Rodapé */
+#rodape{
+  font-weight: white;
+  text-align: center;
+  background-color: #444;
+}
+
+
+.contact-box i{
+  color: white;
+  border:solid 1px white;
+  border-radius: 50%;
+  width: 55px;
+  height: 55px;
+  line-height: 55px;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.contact-box p{
+  font-size: 16px;
+  color: white;
+}
+
+.contact-title {
+  font-weight: bold;
+  color:rgb(7, 190, 190);
+}
+
+#rodape h3 {
+  color: white;
+}
+
+#rodape row {
+  color: white;
+}
+
+#bttn{
+  position: absolute;
+  right: 70px;
+  top: 10px;
+  width: 120px;
+  height: 30px;
+  padding: 0px;
+}
+
+/* BARRA LATERAL */ 
+
+:root {
+  --main-bg-color: #009d63;
+  --main-text-color:rgb(236, 229, 229);
+}
+
+.primary-text {
+  color: var(--main-text-color);
+}
+
+.rounded-full {
+  border-radius: 100%;
+}
+
+
+#sidebar-wrapper {
+  min-height: 100vh;
+  margin-left: -5rem;
+  -webkit-transition:  0.25s ease-out;
+  -moz-transition:  0.25s ease-out;
+  -o-transition:  0.25s ease-out;
+  transition:  0.25s ease-out;
+  
+}
+
+#sidebar-wrapper .sidebar-heading {
+  padding: 0.875rem 1.25rem;
+  font-size: 1.2rem;
+  width: 15px;
+}
+
+#sidebar-wrapper .list-group {
+  width: 15rem;
+}
+
+#page-content-wrapper {
+  min-width: 100vw;
+}
+
+#wrapper.toggled #sidebar-wrapper {
+  margin-left: 0;
+}
+
+#menu-toggle {
+  cursor: pointer;
+  color: rgb(255, 255, 255);
+  padding: 5px;
+}
+
+.list-group-item {
+  border: none;
+  padding: 20px 30px;
+}
+
+
+.list-group-item.active {
+  background-color: transparent;
+  font-weight: bold;
+  border: none;
+}
+
+
+
+@media (min-width: 768px) {
+  #sidebar-wrapper {
+    margin-left: 0;
+    background-color:  #444;
+  }
+
+  #page-content-wrapper {
+    min-width: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  #wrapper.toggled #sidebar-wrapper {
+    margin-left: -15rem;
+  }
+}
+
+.selectRep, h4 {
+  color: rgb(236, 229, 229);
+  font-family: sans-serif;
+  
+}
