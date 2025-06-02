@@ -3051,7 +3051,7 @@ d3v4.csv("data/excomment_mp_completo.csv", function (data2) {
     if (selectedSide == 'jUnity'){ 
       data = data2.slice(0,160) // usa apenas o repositorio jUnit
     }else {
-      data = data2.slice(161,1830) // usa apenas o repositorio jUnit
+      data = data2.slice(161,1830) // usa apenas o repositorio apache
     }
 
     const arqLength = data.length  //tamanho do db

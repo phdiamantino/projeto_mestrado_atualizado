@@ -1,0 +1,108 @@
+/* ======= Layout Geral ======= */
+body {
+    background-color: Lavender;
+}
+
+/* ======= Sidebar Toggle ======= */
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: -250px;
+}
+
+#sidebar-wrapper {
+    width: 250px;
+    min-width: 250px;
+    transition: margin 0.3s ease;
+}
+
+/* ======= Grid Principal ======= */
+.grid-container {
+    display: grid;
+    grid-template-columns: 50% 5px 50%;
+    grid-template-rows: 50% 5px 50%;
+    height: calc(100vh - 56px); /* ajusta abaixo do navbar */
+    width: 100%;
+}
+
+.box {
+    background-color: white;
+    border: 1px solid lightgray;
+    overflow: hidden;
+}
+
+/* ======= Dragbars ======= */
+.dragbar {
+    background-color: black;
+    z-index: 10;
+}
+
+.dragbar.vertical {
+    cursor: col-resize;
+    width: 5px;
+}
+
+.dragbar.horizontal {
+    cursor: row-resize;
+    height: 5px;
+}
+
+/* ======= Posições no Grid ======= */
+#sumburst {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+#dragbar1 {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+#themeRiver {
+    grid-column: 3;
+    grid-row: 1;
+}
+
+#dragbar2 {
+    grid-column: 1 / 4;
+    grid-row: 2;
+}
+
+#multidimencionalProjection {
+    grid-column: 1;
+    grid-row: 3;
+}
+
+#dragbar3 {
+    grid-column: 2;
+    grid-row: 3;
+}
+
+#parallelCordinates {
+    grid-column: 3;
+    grid-row: 3;
+}
+#parallelCordinates svg {
+  cursor: grab; /* dá feedback visual que o eixo pode ser movido */
+  user-select: none; /* evita seleção de texto durante o drag */
+}
+
+.dimension {
+  cursor: grab;
+}
+
+
+/* ======= Específicos ======= */
+#multidimencionalProjectionTable table {
+    width: 100%;
+}
+
+/* Eixo do gráfico (Parallel Coordinates) */
+.axis text {
+    cursor: move;
+    text-shadow: 0 1px 0 #fff, 1px 0 0 #fff,
+                 0 -1px 0 #fff, -1px 0 0 #fff;
+}
+
+/* ======= Navbar Ajuste ======= */
+.navbar {
+    z-index: 1000;
+}

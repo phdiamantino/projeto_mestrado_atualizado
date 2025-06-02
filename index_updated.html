@@ -1,0 +1,384 @@
+<!doctype html>
+<html>
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+   <!-- D3-->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+      <script>  
+        d3v4 = window.d3;
+        window.d3 = null;</script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src='https://raw.githack.com/karpathy/tsnejs/master/tsne.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.13.0/d3-legend.js"></script>
+    <!--  jQuery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="js/scripts.js"></script>
+    <!-- TSNE-->
+    <script src="tsne.js"></script>
+    <!--<script src="tsne.min.js"></script>
+    <script src="worker.js"></script>-->
+    <!-- Bootstrap-->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>  
+    <link rel="stylesheet" href="css/style.css"></link>
+     <!-- Fonte / ProgressBar / Parallax-->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/fontawesome.min.css" integrity="sha384-wESLQ85D6gbsF459vf1CiZ2+rr+CsxRY0RpiF1tLlQpDnAgg6rwdsUF1+Ics2bni" crossorigin="anonymous">
+      <!-- <script src="css/progressbar.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/parallax.js/1.4.2/parallax.min.js"></script>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  
+
+   <style>
+      .dragbar {
+        background-color: black;
+        padding: 0;
+      }
+
+      .dragbar.vertical {
+        cursor: col-resize;
+        width: 3px;
+      }
+
+      .dragbar.horizontal {
+        cursor: row-resize;
+        height: 3px;
+        width: 100%;
+      }
+    </style>
+    <title>D3.Js</title>
+</head>
+
+<header>    
+  <div class="cont" id="nav-cont">
+    <nav class="navbar navbar-expand-lg fixed-top bg-dark bg-gradient">
+      <div class="d-flex align-items-center">
+        <i class="fas me-1"></i>
+        <i class="fas fa-align-left primary-text fs-4 me-3" id="menu-toggle"></i>
+          <h2 class="fs-2 m-0">Visual Debts Analytics</h2>
+      </div>
+      <div class="collapse navbar-collapse justify-content-end" id="navbar-links"> 
+        <div class="navbar-nav">
+          <!--<a class="nav-link active" aria-current="page" href="#">Home</a>-->
+          <a class="nav-item nav-link" id="about-menu" href="about.html">About</a>
+        </div>
+      </div>
+    </nav>
+  </div> 
+</header>
+
+
+
+<!--Barra Lateral-->
+<div class="d-flex" id="wrapper" style="height: 47rem;">
+  <!-- Sidebar -->
+  <div class="bg-dark gradient" id="sidebar-wrapper">
+      <div class="sidebar-heading"></div>
+      <!-- Selecionar Repositório-->
+              <div  class="form-group form-control-lg" >
+                <label for="selectRep" ><h4> Select Repository</h4></label>
+                <div id="formSide">
+                  <div id="formSB">
+                    <div id="formTR">
+                      <div id="formMP">
+                        <select id="selectRep" class="form-select my-select" required>
+                          <option value="jUnity" selected>jUnit</option>
+                          <option value="Apache">Apache</option>
+                        </select>
+                      </div>
+                    </div>
+                </div>
+              </div>
+              <p id="selectedRep"></p>
+              </div>
+              <div class="list-group list-group-flush my-3">  
+              </div>
+
+                <div class="card bg-dark" style="width: 12rem;height: 20rem;right: -21px;">
+                  <div id= "sidebarInfo"></div>
+                </div>       
+ 
+  </div>
+
+
+
+<!--CORPO -->
+<body onmouseup="endDrag()">
+  <style>
+    .dragbar{
+      background: Azure;
+      stroke-width: 8;
+    }
+    .dragbar:hover {
+      background: f5f5f5;
+    }
+    .row{
+      background: Azure;
+      stroke-width: 8;
+    }
+    .bg{
+      /*background:rgb(238, 238, 238)*/ /*mais claro*/
+      background: Lavender;
+    }
+  </style>
+  <div class="container" id="container" onmousemove="onDrag(event)" style="max-width: 1160px">
+    <div class="row elements-row" style="stroke-width: 8;">
+  <!-- Vis Superiores-->
+  <!-- Vis 1-->
+      <div id="sumburst" class="bg" style="height: calc(100% - 4px); width: calc(50% - 2px); stroke-width: 7rem;"></div>
+      <div class="dragbar vertical " onmousedown="startDragbar('bar1')"></div>
+  <!-- Vis 2-->
+      <div id="themeRiver" class="bg" style="height: calc(100% - 4px); width: calc(50% - 2px)">
+        <div id="barGraph"></div>
+        <div id="wordCloud"></div>
+        <div id="legend_tr"></div>
+            <select id="custom-select-tr">
+              <option value="Quintil" selected> Quintile</option>
+              <option value="Decil"> Decile</option>
+            </select>
+            <p id="selectedQ"></p>
+            <form id='form'>
+              <input type="radio" name="colorButton" value="words"checked><b> Main Words</b> <br>
+              <input type="radio" name="colorButton" value="resultwords"><b> Feeling Words</b><br>
+            </form>
+      </div>
+      <div class="dragbar horizontal" onmousedown="startDragbar('bar2')"></div>
+    </div>
+
+
+  <!-- Vis Inferiores-->
+  <!-- Vis 3-->
+    <div class="row elements-row">
+      <div id="multidimencionalProjection" class="bg" style="height: 100%; width: calc(50% - 2px)">
+        <style>
+          #forces{
+            position: absolute; 
+            top: 40px;
+            left: 410px;
+            width: 160px;
+            height: 80px;
+            /*background-color:rgb(211, 208, 208);
+            top: 40px;
+            left: 410px;*/
+          }
+          #bttn {
+            top: 30px;
+            left: 70px;
+            width: 75px;
+            height: 25px;
+            font-size: 12px;
+          }
+          #force {
+            position: absolute;
+            width: 28px; 
+            height: 14px;
+            top: 4px;
+            left: 78px;
+          }
+          #force2 {
+            position: absolute; 
+            top: 5px;
+            left: 70px;
+            font-size: 12px;
+          }
+          #legendmp{
+            position: relative ;
+            overflow: hidden; 
+            top: 0px;
+            left: 0px;
+          }
+        </style>
+        <div id='legendmp'></div>
+        
+        <div class="form-check form-switch" id="forces" width="40" height="400" viewBox="0 -0 350 200" >
+          <button type="button" id='bttn' class="btn btn-secondary" viewBox="0 0 150 300" >Reset Zoom</button>
+          <input class="form-check-input " type="checkbox" id='force' value="force">
+          <label id='force2' > Worker Force</label>
+        </div>
+        <svgMP>
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop   offset="0.0%" stop-color="#2c7bb6"></stop>
+              <stop  offset="12.5%" stop-color="#00a6ca"></stop>
+              <stop  offset="25.0%" stop-color="#00ccbc"></stop>
+              <stop  offset="37.5%" stop-color="#90eb9d"></stop>
+              <stop  offset="50.0%" stop-color="#ffff8c"></stop>
+              <stop  offset="62.5%" stop-color="#f9d057"></stop>
+              <stop  offset="75.0%" stop-color="#f29e2e"></stop>
+              <stop  offset="87.5%" stop-color="#e76818"></stop>
+              <stop offset="100.0%" stop-color="#d7191c"></stop>
+            </linearGradient>
+          </defs>
+        </svgMP>
+        <!--Tabela p/ brush-->
+
+
+      <!--End MP-->
+      </div>
+      <div class="dragbar vertical" onmousedown="startDragbar('bar3')"></div>
+
+
+    <!-- Vis 4-->  
+      <div id="parallelCordinates" class="bg"  style="height: 100%; width: calc(50% - 2px)">
+        <style>
+          .axis text {
+            text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+            cursor: move;
+          }
+        </style>
+        <div id="versions"></div> 
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--Table-->
+<div id="multidimencionalProjectionTable" style="word-wrap: break-word;">
+    <table style="width: 100%" >
+      <tbody class="table table-borderless">
+        <tr>
+          <th width="10%">Filename</th>
+          <th style="min-width:110px">Reference</th>
+          <th scope="row">Patern</th> 
+          <th>Heuristic</th> 
+          <th>Score</th> 
+          <th style="min-width:60px">Quant of Debts</th> 
+          <th style="max-width:200px" >Type of Debts</th> 
+          <th>Indicators</th>
+        </tr>
+      </tbody>
+    </table>
+</div>
+
+
+
+
+
+
+
+
+
+ <!-- Resize Elements -->
+  <script>
+    const element1 = document.querySelector('#sumburst')
+    const element2 = document.querySelector('#themeRiver')
+    const element3 = document.querySelector('#multidimencionalProjection')
+    const element4 = document.querySelector('#parallelCordinates')
+    const rows = document.querySelectorAll('.elements-row') // rows[0] -> azul e cinza; rows[1] -> verde e amarelo
+
+    const container = {
+      width: 1160,
+      height: 600
+    }
+
+    const config = {
+      precisionOffset: Math.ceil((document.body.clientWidth - container.width) / 2),
+      dragbarWidth: 4,
+      element: {
+        height: 300,
+        minHeight: 100,
+        minWidth: 100,
+      },
+      container
+    }
+
+    rows.forEach(row => { row.style.height = `${config.element.height}px` })
+
+    function horizontalResize(dragPosition, leftElement, rightElement) {
+      const width = dragPosition - config.precisionOffset;
+      const leftElementWidth = width;
+      const rightElementWidth = config.container.width - (width + config.dragbarWidth)
+
+      if (leftElementWidth < config.element.minWidth || rightElementWidth < config.element.minWidth) {
+        return;
+      }
+
+      leftElement.style.width = `${leftElementWidth}px`;
+      rightElement.style.width = `${rightElementWidth}px`
+    }
+
+    const dragbars = {
+      bar1: {
+        started: false,
+        handle(event) {
+          horizontalResize(event.clientX, element1, element2)
+        }
+      },
+      bar2: {
+        started: false,
+        handle(event) {
+          const height = event.clientY;
+          const topElementHeight = config.container.height - (height + config.dragbarWidth)
+          const bottomElementHeight = height;
+
+          if (topElementHeight < config.element.minHeight || bottomElementHeight < config.element.minHeight) {
+            return;
+          }
+
+          rows[1].style.height = `${topElementHeight}px`
+          rows[0].style.height = `${bottomElementHeight}px`
+        }
+      },
+      bar3: {
+        started: false,
+        handle(event) {
+          horizontalResize(event.clientX, element3, element4)
+        }
+      }
+    }
+
+    function startDragbar(code) {
+      if (dragbars.hasOwnProperty(code)) {
+        dragbars[code].started = true
+      }
+    }
+
+    function endDrag() {
+      Object.keys(dragbars).map(code => { dragbars[code].started = false })
+    }
+
+    function onDrag(event) {
+      if (dragbars.bar1.started) {
+        dragbars.bar1.handle(event)
+      }
+
+      if (dragbars.bar2.started) {
+        dragbars.bar2.handle(event)
+      }
+
+      if (dragbars.bar3.started) {
+        dragbars.bar3.handle(event)
+      }
+    }
+  </script>
+
+  <!-- Resize Sidebar -->
+  <script>
+    var el = document.getElementById("wrapper");
+    var toggleButton = document.getElementById("menu-toggle");
+
+    toggleButton.onclick = function () {
+        el.classList.toggle("toggled");
+    };
+  </script>
+
+  <!-- Chamar CSS e JS -->
+  <script src="vis/pc.js"></script>
+  <script src="vis/sb.js"></script>
+  <script src="vis/tr.js"></script>
+  <script src="vis/mp.js"></script>
+  <link rel="stylesheet" href="style.css">
+</body>
+
+
+</html>
