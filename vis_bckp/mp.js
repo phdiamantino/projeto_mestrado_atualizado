@@ -4,10 +4,16 @@ let WIDTH4, HEIGHT4;
 let svgMP, svgMPtable, colorMP, xScale, yScale, x, y, circles, forcetsne;
 let currentMPData = null;
 let currentDataaux = null;
-let isForceActive = true;
+let isProjectionComputed = false;
+let isForceActive = false;
 let zoomBehavior = null;
 let mainGroup = null;
 let worker = null;
+let isPlotReady = false;
+let tsnePositions = null; 
+let originalPositions = null; 
+let fixedPathMP = null; // Track the currently clicked/fixed point
+
 function initializeMP() {
     const container = document.getElementById('legendmp');
     if (!container) return;
@@ -22,18 +28,19 @@ function initializeMP() {
         .style("z-index", "1000")
         .style("display", "flex")
         .style("gap", "10px");
+        
     
     // Add force toggle button
-    controlsDiv.append("button")
+     controlsDiv.append("button")
         .attr("id", "forceToggle")
         .style("padding", "5px 10px")
-        .style("background", "#007bff")
+        .style("background", "#59A5EB")
         .style("color", "white")
         .style("border", "none")
         .style("border-radius", "3px")
         .style("cursor", "pointer")
         .style("font-size", "12px")
-        .text("Stop Force")
+        .text("Start Force")
         .on("click", toggleForce);
     
     // Add zoom reset button
@@ -81,12 +88,12 @@ function initializeMP() {
             .data(columns)
             .enter()
             .append("th")
-            .style("padding", "8px")
+            .style("padding", " 0 8px")
             .style("text-align", "left")
             .style("border-bottom", "2px solid #ddd")
-            .style("background-color", "#f1f3f5")
+            .style("background-color", "#E5E3EB")
             .style("position", "sticky")
-            .style("top", "0")
+            .style("top", "-20px")
             .text(d => d);
         
         table.append("tbody");
@@ -107,14 +114,12 @@ function initializeMP() {
     });
 }
 
-// Adicione esta função global para atualizar a projeção multidimensional
 window.reDrawMP = function(name_version) {
     if (!name_version || !name_version.key) return;
     
     const version_clicked = name_version.key;
     console.log("Version clicked for MP:", version_clicked);
     
-    // Filtrar dados para a versão selecionada
     const data_filter = currentDataPC.filter(function(item) {
         return item.reference === version_clicked;
     });
@@ -140,7 +145,6 @@ window.reDrawMP = function(name_version) {
     console.log("MP updated for version:", version_clicked, "with", data_filter.length, "items");
 };
 
-
 function initializeTSNEWorker() {
     if (!worker) {
         console.error("Worker not initialized");
@@ -149,22 +153,31 @@ function initializeTSNEWorker() {
     
     worker.onmessage = function(e) {
         if (e.data.pos) {
-            const pos = e.data.pos;
-            // Update the positions in your visualization
-            if (circles && forcetsne) {
-                circles.data().forEach((d, i) => {
-                    if (pos[i]) {
-                        d.x = pos[i][0];
-                        d.y = pos[i][1];
+            tsnePositions = e.data.pos.map(pos => [...pos]); 
+            
+            if (circles && currentMPData) {
+                currentMPData.forEach((d, i) => {
+                    if (tsnePositions[i]) {
+                        d.tsne_x = tsnePositions[i][0] * 150;
+                        d.tsne_y = tsnePositions[i][1] * 150;
+                        if (!isForceActive) {
+                            d.x = d.tsne_x;
+                            d.y = d.tsne_y;
+                        }
                     }
                 });
-                forcetsne.alpha(0.3).restart();
+                if (!isForceActive) {
+                    circles
+                        .attr('cx', d => x(d.x))
+                        .attr('cy', d => y(d.y));
+                }
             }
         }
         if (e.data.stop) {
             console.log("t-SNE completed");
+            isPlotReady = true;
             if (forcetsne) {
-                forcetsne.alphaDecay(0.02);
+                forcetsne.alpha(0); 
             }
         }
         if (e.data.error) {
@@ -187,20 +200,49 @@ function updateMPDimensions() {
 }
 
 function toggleForce() {
+    if (!isPlotReady) {
+        console.log("Plot not ready yet");
+        return;
+    }
+    
     isForceActive = !isForceActive;
     const button = d3.select("#forceToggle");
     
     if (isForceActive) {
         button.text("Stop Force")
-            .style("background", "#007bff");
+            .style("background", "#dc3545");
+        
         if (forcetsne) {
-            forcetsne.alpha(0.3).restart();
+            if (currentMPData) {
+                originalPositions = currentMPData.map(d => ({x: d.x, y: d.y}));
+            }
+            
+            forcetsne.force('collide', d3.forceCollide().radius(d => (d.r || 4) + 2).strength(0.7))
+                     .alpha(0.3)
+                     .alphaTarget(0.1)
+                     .restart();
         }
     } else {
         button.text("Start Force")
-            .style("background", "#6c757d");
+            .style("background", "#59A5EB");
+        
         if (forcetsne) {
-            forcetsne.alpha(0);
+            if (currentMPData && tsnePositions) {
+                currentMPData.forEach((d, i) => {
+                    if (d.tsne_x !== undefined && d.tsne_y !== undefined) {
+                        d.x = d.tsne_x;
+                        d.y = d.tsne_y;
+                    }
+                });
+                circles
+                    .transition()
+                    .duration(500)
+                    .attr('cx', d => x(d.x))
+                    .attr('cy', d => y(d.y));
+            }
+            forcetsne.force('collide', null)
+                     .alpha(0)
+                     .alphaTarget(0);
         }
     }
 }
@@ -214,6 +256,11 @@ function resetZoom() {
 }
 
 function updateMP(selectedGroup) {
+    isProjectionComputed = false;
+    tsnePositions = null;
+    originalPositions = null; 
+    fixedPathMP = null; // Clear fixed path when repository changes
+    
     if (!document.getElementById('legendmp')) return;
     
     updateMPDimensions();
@@ -242,7 +289,6 @@ function loadMPData(repo) {
         csvAuxFile = 'data/excomment_mp_apache.csv';
     }
     
-    // Load both CSV files
     Promise.all([
         d3.csv(csvFile, d3.autoType),
         d3.csv(csvAuxFile, d3.autoType)
@@ -279,6 +325,7 @@ function loadMPData(repo) {
         
         createMPLegend(auxData);
         updateallMP(processedData);
+        isProjectionComputed = true;
     })
 }
 
@@ -299,12 +346,11 @@ function createMPLegend(dataaux) {
     
     svgMP.selectAll(".legend").remove();
     
-    //  cor gradient
     const legend = svgMP.append("g")
         .attr("class", "legend")
         .attr("transform", `translate(${MARGIN4.LEFT},${HEIGHT4 + MARGIN4.TOP + 10})`);
     
-    // Create legend rectangles
+    // Legendas
     const legendData = pair(lScale.ticks(10));
     legend.selectAll("rect")
         .data(legendData)
@@ -368,6 +414,8 @@ window.updateallMP = function(data) {
         .on("start", () => {
             isBrushing = true;
             svgMP.on('.zoom', null);
+            // On brush start, clear any fixed highlight
+            clearFixedHighlight(); 
         })
         .on("brush", function(event) {
             highlightBrushedCircles(event);
@@ -397,6 +445,13 @@ window.updateallMP = function(data) {
         .domain([-200, 200]) 
         .range([HEIGHT4, 0]);
     
+    data.forEach(d => {
+        d.x = (Math.random() - 0.5) * 100;
+        d.y = (Math.random() - 0.5) * 100;
+        d.tsne_x = undefined;
+        d.tsne_y = undefined;
+    });
+    
     // Create circles
     circles = mainGroup.selectAll('circle')
         .data(data)
@@ -412,80 +467,114 @@ window.updateallMP = function(data) {
         .attr('stroke-width', 0.8)
         .attr('opacity', 0.8)
         .style("fill", d => colorMP(d[3] + 1))
-        .on("click", function(event, d) {
-            clickedMP(event, d, data.indexOf(d));
-        })
+        .attr('cx', d => x(d.x))
+        .attr('cy', d => y(d.y))
         .on("mouseover", function(event, d) {
-            const index = data.indexOf(d);
-            const tooltip = d3.select("body").append("div")
-                .attr("class", "toolTip")
-                .style("position", "absolute")
-                .style("background", "rgba(0, 0, 0, 0.8)")
-                .style("color", "white")
-                .style("padding", "8px")
-                .style("border-radius", "4px")
-                .style("font-size", "12px")
-                .style("pointer-events", "none")
-                .style("z-index", "1000")
-                .html(`<b>File:</b> ${currentDataaux[index]?.filename || 'N/A'}<br/>
-                       <b>Score:</b> ${Math.round(d[3])}<br/>
-                       <b>Debts:</b> ${d[4]}`);
+            d3.selectAll(".toolTip").remove(); // Ensure previous tooltips are removed
+        })
+        .on("mouseout", function(event, d) {
+            d3.selectAll(".toolTip").remove(); // Always remove tooltip on mouseout
+        })
+        .on("click", function(event, d) {
+            event.stopPropagation(); // Prevent event from bubbling up
             
-            tooltip.style("left", (event.pageX + 10) + "px")
-                   .style("top", (event.pageY - 10) + "px");
-        })
-        .on("mouseout", function() {
-            d3.selectAll(".toolTip").remove();
-        });
-    
-    // Initialize random positions for t-SNE
-    let pos = data.map(d => [Math.random() - 0.5, Math.random() - 1.5]);
-    
-    // Force simulation with t-SNE integration
-    forcetsne = d3.forceSimulation(data)
-        .alphaDecay(0.02)
-        .alpha(0.1)
-        .force('tsne', function(alpha) {
-            data.forEach((d, i) => {
-                d.x += alpha * (150 * pos[i][0] - d.x);
-                d.y += alpha * (150 * pos[i][1] - d.y);
-            });
-        })
-        .force('orientation', function() {
-            let tx = 0, ty = 0;
-            data.forEach((d, i) => {
-                tx += d.x * d[0];
-                ty += d.y * d[0];
-            });
-            let angle = Math.atan2(ty, tx);
-            let s = Math.sin(angle);
-            let c = Math.cos(angle);
-            
-            data.forEach(d => {
-                let newX = d.x * s - d.y * c;
-                let newY = d.x * c + d.y * s;
-                d.x = newX;
-                d.y = newY;
-            });
-        })
-        .force('collide', d3.forceCollide().radius(d => 1 + (d.r || 4)))
-        .on('tick', function() {
-            circles
-                .attr('cx', d => x(d.x))
-                .attr('cy', d => y(d.y));
-        });
+            // Clear previous fixed highlight on MP points
+            circles.classed("clicked-fixed", false)
+                   .style("fill", c => colorMP(c[3] + 1)); // Restore original color for all points
 
-    data.forEach(d => {
-        d.x = (Math.random() - 0.5) * 100;
-        d.y = (Math.random() - 0.5) * 100;
+            // Set current clicked circle as fixed and apply green color
+            d3.select(this).classed("clicked-fixed", true)
+                           .style("fill", "green"); // Green color for fixed point
+
+            const index = data.indexOf(d);
+            fixedPathMP = currentDataaux[index]?.filename; // Store the filename of the clicked point
+            
+            // Highlight the corresponding path in Sunburst
+            if (typeof window.highlightSunburstPath === 'function' && fixedPathMP) {
+                window.highlightSunburstPath(fixedPathMP);
+            }
+            
+            // Update the table for the clicked item
+            clearMPTableRows();
+            showMPTableColNames();
+            const dataIndex = d[d.length - 1] !== undefined ? d[d.length - 1] : index;
+            if (currentDataaux[dataIndex]) {
+                populateMPTableRow(currentDataaux[dataIndex]);
+            }
+        })
+        .on("dblclick", function(event, d) {
+            event.stopPropagation(); // Prevent event from bubbling up
+            
+            // Restore all points to original color
+            circles.classed("clicked-fixed", false)
+                   .style("fill", c => colorMP(c[3] + 1));
+            
+            // Clear the fixedPathMP variable
+            fixedPathMP = null;
+
+            // Clear the highlight in Sunburst
+            if (typeof window.clearSunburstHighlight === 'function') {
+                window.clearSunburstHighlight();
+            }
+
+            // Clear the table
+            clearMPTableRows();
+            hideMPTableColNames();
+        });
+    
+    // Handle click on SVG background to clear selection
+    svgMP.on("click", function(event) {
+        if (event.target === this) { // Only if clicking directly on SVG background
+            // Restore all points to original color
+            circles.classed("clicked-fixed", false)
+                   .style("fill", c => colorMP(c[3] + 1));
+            
+            // Clear the fixedPathMP variable
+            fixedPathMP = null;
+
+            // Clear the highlight in Sunburst
+            if (typeof window.clearSunburstHighlight === 'function') {
+                window.clearSunburstHighlight();
+            }
+
+            // Clear the table
+            clearMPTableRows();
+            hideMPTableColNames();
+        }
     });
     
+    // FORCE
+    forcetsne = d3.forceSimulation(data)
+        .alphaDecay(0.005) 
+        .alpha(0)
+        .velocityDecay(0.4) 
+        .force('tsne', function(alpha) {
+            data.forEach((d, i) => {
+                if (tsnePositions && tsnePositions[i]) {
+                    const targetX = tsnePositions[i][0] * 150;
+                    const targetY = tsnePositions[i][1] * 150;
+                    d.vx = (d.vx || 0) + alpha * (targetX - d.x) * 0.1;
+                    d.vy = (d.vy || 0) + alpha * (targetY - d.y) * 0.1;
+                }
+            });
+        })
+        .on('tick', function() {
+            if (circles) {
+                circles
+                    .attr('cx', d => x(d.x))
+                    .attr('cy', d => y(d.y));
+            }
+        })
+        .on('end', function() {
+            isPlotReady = true;
+            console.log("Plot ready - force can be activated");
+        });
+
+    // Iniciar t-SNE
     if (worker) {
-        // Prepare data for t-SNE
         const tsneData = data.map(d => {
-            // Extract all numeric features for t-SNE
             const features = [];
-            for (let i = 5; i < d.length - 1; i++) { // Skip first 5 columns and last index column
+            for (let i = 5; i < d.length - 1; i++) {
                 if (typeof d[i] === 'number') {
                     features.push(d[i]);
                 }
@@ -494,74 +583,28 @@ window.updateallMP = function(data) {
         });
         
         worker.postMessage({
-            maxIter: 1000,
+            maxIter: 500,
             dim: 2,
-            perplexity: 30.0,
+            perplexity: Math.min(30.0, Math.floor(data.length / 3)),
             metric: 'euclidean',
             data: tsneData
         });
     }
-    
-    if (!isForceActive) {
-        forcetsne.alpha(0);
-    }
 };
 
 function clickedMP(event, d, index) {
-    if (!currentDataaux) return;
-
-    circles.attr("class", "non_brushed")
-        .attr("r", d => d.r = 4 + 0.7 * (d[4] || 1))
-        .attr('opacity', 0.8)
-        .style("fill", d => colorMP(d[3] + 1));
-
-    if (event.defaultPrevented) return;
-    
-    // Highlight clicked circle
-    d3.select(event.currentTarget)
-        .attr('r', d => d.r = 2 + 4 + 0.6 * (d[4] || 1))
-        .transition().duration(600)
-        .attr('r', d => d.r = 1 + 4 + 0.7 * (d[4] || 1))
-        .attr("class", "clicked")
-        .style("fill", "green")
-        .attr('opacity', 0.8);
-    // Clear and update table
-    clearMPTableRows();
-    showMPTableColNames();
-    // Buscar o índice correto nos dados filtrados
-    const dataIndex = d[d.length - 1] !== undefined ? d[d.length - 1] : index;
-    // Verificar se o índice existe nos dados atuais
-    if (currentDataaux[dataIndex]) {
-        populateMPTableRow(currentDataaux[dataIndex]);
-    } else {
-        const matchingData = currentDataaux.find(item => {
-            return Math.abs(item.x - d[0]) < 0.001 && Math.abs(item.y - d[1]) < 0.001;
-        });
-        
-        if (matchingData) {
-            populateMPTableRow(matchingData);
-        }
-    }
-    
-    if (typeof highlightsb === 'function') {
-        const targetData = currentDataaux[dataIndex] || currentDataaux.find(item => 
-            Math.abs(item.x - d[0]) < 0.001 && Math.abs(item.y - d[1]) < 0.001
-        );
-        if (targetData) {
-            highlightsb(targetData);
-        }
-    }
-
-    setTimeout(() => {
-        d3.select(event.currentTarget)
-            .attr("class", "non_brushed")
-            .style("fill", d => colorMP(d[3] + 1))
-            .attr('opacity', 0.8);
-    }, 1000);
+    // This function is no longer directly used for click events,
+    // as the logic has been moved to the .on("click") listener directly above.
+    // Keeping it for reference or if it's called elsewhere.
 }
-// Brush functions
+
+// Brush
 function highlightBrushedCircles(event) {
-    if (!event.selection) return;
+    if (!event.selection) {
+        circles.style("fill", d => colorMP(d[3] + 1))
+               .attr("class", "non_brushed");
+        return;
+    }
     
     const [[x0, y0], [x1, y1]] = event.selection;
     
@@ -584,7 +627,12 @@ function highlightBrushedCircles(event) {
 }
 
 function displayMPTable(event) {
-    if (!event.selection) return;
+    if (!event.selection) {
+        clearMPTableRows();
+        // Clear any fixed highlight when brush ends with no selection
+        clearFixedHighlight(); 
+        return;
+    }
     
     const brushedCircles = mainGroup.selectAll(".brushed");
     if (brushedCircles.empty()) {
@@ -610,8 +658,10 @@ window.reDrawMP = function(name_version) {
     if (!circles || !currentDataaux) return;
     
     circles.style("fill", d => colorMP(d[3] + 1))
-           .attr("class", "non_brushed");
-    
+           .attr("class", "non_brushed")
+           .classed("clicked-fixed", false); // Ensure no fixed highlights when redrawing
+    fixedPathMP = null; // Clear fixed path
+
     const version_clicked = name_version.key;
     const ids = [];
     
@@ -638,32 +688,8 @@ window.reDrawMP = function(name_version) {
 };
 
 window.mouseoversb = function(arqv) {
-    if (!circles || !currentDataaux) return;
-    
-    function allPath(node) {
-        const path = [];
-        let current = node;
-        while (current.parent) {
-            path.unshift(current.data.key);
-            current = current.parent;
-        }
-        return path.toString();
-    }
-    
-    const arquivo = allPath(arqv).replace(/,/g, "/");
-    const idselecionado = [];
-    
-    currentDataaux.forEach((d, i) => {
-        if (arquivo === d.filename) {
-            idselecionado.push(i);
-        }
-    });
-    
-    circles.style("fill", d => colorMP(d[3] + 1))
-           .attr('opacity', 0.8);
-    
-    circles.filter(d => idselecionado.includes(d[d.length - 1]))
-           .style("fill", "green");
+    // This function is no longer needed as Sunburst no longer highlights from MP interaction
+    // It is effectively an empty function now.
 };
 
 // Table functions
@@ -735,15 +761,33 @@ window.populateMPTableRow = function(d_row) {
 
 window.populateTableRow = window.populateMPTableRow;
 
-window.resizeMP = function() {
+window.resizeMP = function () {
     updateMPDimensions();
-    
+
     if (forcetsne && WIDTH4 && HEIGHT4) {
-        forcetsne.force('center', d3.forceCenter(WIDTH4/2, HEIGHT4/2));
+        forcetsne.force('center', d3.forceCenter(WIDTH4 / 2, HEIGHT4 / 2));
     }
-    if (currentMPData && currentDataaux) {
+
+    if (!isProjectionComputed && currentMPData && currentDataaux) {
         createMPLegend(currentDataaux);
         updateallMP(currentMPData);
+        isProjectionComputed = true;
+    } else if (currentDataaux) {
+        createMPLegend(currentDataaux);
+    }
+};
+
+// This function now primarily manages MP's own fixed highlight and also clears brush.
+window.clearFixedHighlight = function() {
+    if (circles) {
+        circles.classed("clicked-fixed", false)
+               .style("fill", d => colorMP(d[3] + 1)); // Restore original color
+    }
+    fixedPathMP = null; // Clear the fixed path variable for MP
+    
+    // Also clear Sunburst highlight
+    if (typeof window.clearSunburstHighlight === 'function') {
+        window.clearSunburstHighlight();
     }
 };
 
@@ -764,6 +808,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Export functions for global access
 window.updateMP = updateMP;
 window.initializeMP = initializeMP;

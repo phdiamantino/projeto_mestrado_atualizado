@@ -1,35 +1,40 @@
-const jUnitRepoId = "5a932d02b8a9f956ba503603";
-
 const REPO_FILE_COUNTS = {
     'jUnit': 161,
     'Apache': 1669
 };
 
 function loadSidebarData() {
-    Promise.all([
-        d3.json("data/rm_technical_debt.json")
-    ]).then(([jsonData]) => {
-        if (!jsonData || !Array.isArray(jsonData)) {
-            throw new Error("Dados JSON não estão no formato esperado");
-        }
+    d3.json("data/rm_technical_debt.json")
+        .then(jsonData => {
+            if (!jsonData || !Array.isArray(jsonData)) {
+                throw new Error("Dados JSON não estão no formato esperado");
+            }
 
-        const jUnitData = jsonData.filter(d => d.repository === jUnitRepoId);
-        const apacheData = jsonData.filter(d => d.repository !== jUnitRepoId);
+            // ✅ Nova lógica: separa os repositórios com base nos campos de 'repository'
+            const repositories = Array.from(new Set(jsonData.map(d => d.repository)));
 
-        const organizedData = {
-            'jUnit': jUnitData,
-            'Apache': apacheData
-        };
+            if (repositories.length < 2) {
+                throw new Error("Esperado pelo menos dois repositórios no JSON");
+            }
 
-        setupSidebarControls(organizedData);
+            const repoNames = ['jUnit', 'Apache'];
 
-        // Armazena dados globais (opcional)
-        window.sidebarData = organizedData;
+            const organizedData = {};
 
-    }).catch(error => {
-        console.error("Erro ao carregar dados:", error);
-        showError(error);
-    });
+            repositories.forEach((repoId, index) => {
+                const repoName = repoNames[index] || `Repo${index + 1}`;
+                organizedData[repoName] = jsonData.filter(d => d.repository === repoId);
+            });
+
+            setupSidebarControls(organizedData);
+
+            // Armazena dados globais (opcional)
+            window.sidebarData = organizedData;
+        })
+        .catch(error => {
+            console.error("Erro ao carregar dados:", error);
+            showError(error);
+        });
 }
 
 function setupSidebarControls(data) {
@@ -39,7 +44,7 @@ function setupSidebarControls(data) {
         const selectedRepo = this.value;
         updateSidebarDisplay(data, selectedRepo);
 
-        // 🔄 Notifica outros módulos (como o Sunburst) da mudança
+        // Notifica outras visualizações (Sunburst, etc.)
         if (typeof window.onRepositoryChange === 'function') {
             window.onRepositoryChange(selectedRepo);
         }
@@ -56,12 +61,8 @@ function updateSidebarDisplay(data, selectedRepo) {
 
         const stats = calculateStatistics(tdData);
 
-        // Usa os valores fixos definidos
-        stats.files = REPO_FILE_COUNTS[selectedRepo];
-
-        console.log("Repositório selecionado:", selectedRepo);
-        console.log("Valor fixo de arquivos:", REPO_FILE_COUNTS[selectedRepo]);
-        console.log(`Estatísticas para ${selectedRepo}:`, stats);
+        // ✅ Aplica o valor fixo de arquivos
+        stats.files = REPO_FILE_COUNTS[selectedRepo] ?? 0;
 
         updateCardsInfo(stats);
         document.getElementById('selectedRep').textContent = `Selected: ${selectedRepo}`;
@@ -85,7 +86,7 @@ function calculateStatistics(tdData) {
 
         return {
             versions,
-            files: 0, // Sobrescrito com valor fixo
+            files: 0, // Sempre sobrescrito depois
             totalDebts
         };
     } catch (error) {
@@ -99,9 +100,9 @@ function calculateStatistics(tdData) {
 }
 
 function updateCardsInfo(stats) {
-    d3.select("#card-versions .value").text(stats.versions);
-    d3.select("#card-files .value").text(stats.files);
-    d3.select("#card-total .value").text(stats.totalDebts);
+    d3.select("#card-versions .value").text(stats.versions ?? "0");
+    d3.select("#card-files .value").text(stats.files ?? "0");
+    d3.select("#card-total .value").text(stats.totalDebts ?? "0");
 }
 
 function showError(error) {

@@ -2,7 +2,7 @@ const MARGIN3 = {LEFT: 10, RIGHT: 40, TOP: 0, BOTTOM: 5};
 let WIDTH3, HEIGHT3;
 let selectedGroup = 'jUnit';
 let gTR; 
-let yBar; // Moved to global scope
+let yBar;
 
 let currentXScale = null;
 let currentYScale = null;
@@ -23,22 +23,28 @@ function updateTRDimensions() {
         return;
     }
     
-    WIDTH3 = Math.max(100, container.clientWidth - MARGIN3.LEFT - MARGIN3.RIGHT);
-    HEIGHT3 = Math.max(100, container.clientHeight - MARGIN3.TOP - MARGIN3.BOTTOM);
+    // Calcula as novas dimensões baseadas no container atual
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
     
+    WIDTH3 = Math.max(100, containerWidth - MARGIN3.LEFT - MARGIN3.RIGHT);
+    HEIGHT3 = Math.max(100, containerHeight - MARGIN3.TOP - MARGIN3.BOTTOM);
+    
+    // Atualiza o SVG principal
     svgTR
-        .attr("width", "100%")
-        .attr("height", "100%")
-        .attr("viewBox", `0 30 ${WIDTH3 + MARGIN3.LEFT + MARGIN3.RIGHT+70} ${HEIGHT3 +50+ MARGIN3.TOP + MARGIN3.BOTTOM}`)
+        .attr("width", containerWidth)
+        .attr("height", containerHeight)
+        .attr("viewBox", `0 0 ${containerWidth} ${containerHeight}`)
         .attr("preserveAspectRatio", "xMidYMin meet");
-        
-    // Remove existing g element before creating new one
+    
+    // Remove e recria o grupo principal para garantir limpeza completa
     gTR.remove();
     gTR = svgTR.append("g")
         .attr("transform", `translate(${MARGIN3.LEFT},${MARGIN3.TOP})`);
     
     updateTimeYearPosition();
     
+    // Redesenha o gráfico se houver dados
     if (window.currentTRData) {
         updateTR(selectedGroup);
     }
@@ -252,7 +258,7 @@ function updateTR(selectedGroup) {
         dataflag = window.currentTRData.slice(0, 1449);
         yBar = d3.scaleLinear()
             .domain([0, 700])
-            .range([HEIGHT3 * 0.8, 0]);
+            .range([HEIGHT3 * 0.68, 0]);
         console.log('✔️ Selected jUnit data, records:', dataflag.length);
     } else if (group === 'apache') {
         dataflag = window.currentTRData.slice(1449);
@@ -261,7 +267,7 @@ function updateTR(selectedGroup) {
             .range([HEIGHT3 * 0.8, 0]);
         console.log('✔️ Selected Apache data, records:', dataflag.length);
     } else {
-        console.warn('Unknown group:', selectedGroup);
+        console.warn('❌ Unknown selectedGroup:', selectedGroup);
         return;
     }
 
@@ -272,10 +278,10 @@ function updateTR(selectedGroup) {
     }
 
     // Atualiza a visualização com os dados corretos
-    console.log(`Updating visualization with group: ${customSelect.value} data length: ${dataflag.length}`);
+    console.log(`📊 Updating visualization with group: ${customSelect.value} data length: ${dataflag.length}`);
     updateallTR(dataflag);
 
-    console.log(`Drawing initial graph for group: ${customSelect.value} with selectedGroup: ${group}`);
+    console.log(`🎯 Drawing initial graph for group: ${customSelect.value} with selectedGroup: ${group}`);
 }
 
 // Complete Visualization Update
@@ -369,7 +375,7 @@ window.updateallTR = function(dataS) {
         gTR.append("text")
             .attr("class", "time-year-text")
             .attr("text-anchor", "end")
-            .attr("x", WIDTH3 -500)
+            .attr("x", "8vh")
             .attr("y", HEIGHT3 * 0.70 + 15) 
             .style("font-size", "12px")
             .text("Time (Year)");
@@ -620,7 +626,7 @@ window.updateallTR = function(dataS) {
             tooltipBarGraph.selectAll("*").remove();
             
             tooltipBarGraph.append("g")
-                .attr("transform", "translate(-1," + 173 + ")")
+                .attr("transform", "translate(-1," + 170 + ")")
                 .call(d3.axisBottom(xBar));
             
             tooltipBarGraph.append("g")
@@ -667,7 +673,7 @@ window.updateallTR = function(dataS) {
             .data(stackedData).enter()
             .append("path").attr("class", "myArea")
             .style("stroke-width", 0.3)
-            .style("fill", (d,i) => color(i+1))
+            .style("fill", (d,i) => color(i))
             .attr("d", area)
             .on("mousemove", mousemove)
             .on("mouseover", mouseover)
@@ -680,7 +686,7 @@ var vertical = d3.select("#themeRiver")
     .append("path").attr("class", "vertical")
     .style("position", "absolute")
     .style("width", "1.65px")
-    .style("height", "120px")
+    .style("height", "18vh") 
     .style("top", "0px")
     .style("bottom", "30px")
     .style("left", "10px")
