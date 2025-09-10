@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -50,8 +51,9 @@
       display: flex;
       flex-direction: column;
       transition: margin-left 0.3s;
-      height: 100%;
+      height: calc(100vh - 100px);
       min-width: 0;
+      position: relative;
     }
 
     .cards-container {
@@ -183,40 +185,119 @@
       font-size: 1.3rem;
     }
 
-    #container-table {
-      height: 30vh;
+    /* Nova estrutura da tabela expansível */
+    #table-outer-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1001;
+      background-color: white;
+      border-top: 1px solid #dee2e6;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      transition: height 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    #table-outer-container.collapsed {
+      height: 50px;
+    }
+
+    #table-outer-container.expanded {
+      height: 300px; /* Altura fixa quando expandida */
+    }
+
+    #table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      height: 50px;
+      cursor: pointer;
       background-color: #f8f9fa;
-      margin: 10px 0;
-      width: 100%;
-      padding: 15px;
-      box-sizing: border-box;
-      border-radius: 8px;
-      overflow: auto;
+      border-bottom: 1px solid #dee2e6;
+      flex-shrink: 0;
+      transition: background-color 0.2s;
+    }
+
+    #table-header:hover {
+      background-color: #e9ecef;
+    }
+
+    #table-header h5 {
+      margin: 0;
+      color: #495057;
+      font-weight: 500;
+      font-size: 1.1rem;
+    }
+
+    #toggle-table-btn {
+      background-color: #007bff;
+      border: none;
+      color: white;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    #toggle-table-btn:hover {
+      background-color: #0056b3;
+      transform: scale(1.05);
+    }
+
+    #table-content-container {
+      flex: 1;
+      overflow: hidden;
+      background-color: white;
+      height: calc(100% - 50px);
     }
 
     #multidimencionalProjectionTable {
       width: 100%;
       height: 100%;
+      padding: 0;
+      box-sizing: border-box;
+      overflow: auto;
+      background-color: white;
     }
-
+    
     #multidimencionalProjectionTable table {
       width: 100%;
       border-collapse: collapse;
+      min-width: 600px;
     }
 
     #multidimencionalProjectionTable th, 
     #multidimencionalProjectionTable td {
-      padding: 8px;
+      padding: 12px 15px;
       text-align: left;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #e9ecef;
+      font-size: 14px;
+      white-space: nowrap;
     }
 
     #multidimencionalProjectionTable th {
-      background-color: #f1f3f5;
+      background-color: #f8f9fa;
       position: sticky;
       top: 0;
+      z-index: 10;
+      font-weight: 600;
+      color: #495057;
+      border-bottom: 2px solid #dee2e6;
     }
 
+    #multidimencionalProjectionTable tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    #main-content.table-expanded {
+      height: calc(100vh - 360px);
+    }
+    
     #parallelCordinates {
       width: 100%;
       height: 100%;
@@ -364,6 +445,26 @@
       width: 100%;
       height: 100%;
     }
+
+    /* Scrollbar personalizada para a tabela */
+    #multidimencionalProjectionTable::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    #multidimencionalProjectionTable::-webkit-scrollbar-track {
+      background-color: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    #multidimencionalProjectionTable::-webkit-scrollbar-thumb {
+      background-color: #c1c1c1;
+      border-radius: 4px;
+    }
+
+    #multidimencionalProjectionTable::-webkit-scrollbar-thumb:hover {
+      background-color: #a8a8a8;
+    }
   </style>
   <title>Visual Debts Analytics</title>
 </head>
@@ -413,26 +514,22 @@
     </div>
 
     <div id="main-content">
-      <div style="height: 70%; width: 100%;">
+      <div style="height: 100%; width: 100%;">
         <div id="container">
-          <!-- Top Left Quadrant -->
           <div id="top-left" class="quadrant">
             <div id="sb-container"></div>
           </div>
           
-          <!-- Vertical Bar 1 -->
           <div id="bar1" class="dragbar vertical" onmousedown="startDragbar('bar1')"></div>
 
           <div id="top-right" class="quadrant" style="display: flex; flex-direction: column; padding: 5px;">
             <div style="width: 100%; display: flex; flex-direction: column; margin-bottom: 5px;">
-              <!-- Linha do Quintil/Decil -->
               <div style=" background-color: #fcfcfc; border-radius: 5px;">
                 <select id="custom-select-tr" class="separatriz-select" style="margin-top: 0;">
                   <option value="Quintil">Quintile</option>
                   <option value="Decil">Decile</option>
                 </select>
               </div>
-              <!-- Linha das opções de palavras -->
               <div class="words-container" style="display: flex; align-items: center; margin-top: 5px;">
                 <div class="words-options" style="margin-right: 15px; padding: 0 0">
                   <label>
@@ -447,34 +544,95 @@
                 <div id="words-display" style="font-size: 13px; font-style: italic; color: #333; transition: opacity 0.3s ease;"></div>
               </div>
             </div>
-            <!-- Área do gráfico -->
             <div style="width: 100%; height: calc(100% - 70px); display: flex; flex-direction: column;">
-              <div id="legend_tr" style="height: 20px; margin-bottom: 5px;"></div>
+              <div id="legend_tr" style="height: 0px;"></div>
               <div id="themeRiver" style="flex: 1; position: relative;"></div>
               <div id="barGraph"></div> 
             </div>
           </div>
 
-          <!-- Horizontal Bar -->
           <div id="bar2" class="dragbar horizontal" onmousedown="startDragbar('bar2')" style="grid-column: 1 / span 3;"></div>
 
-          <!-- Bottom Left Quadrant -->
           <div id="bottom-left" class="quadrant">
             <div id="legendmp"></div>
           </div>
           
-          <!-- Vertical Bar 3 -->
           <div id="bar3" class="dragbar vertical" onmousedown="startDragbar('bar3')"></div>
           
-          <!-- Bottom Right Quadrant -->
           <div id="bottom-right" class="quadrant">
             <div id="parallelCordinates"></div>
           </div> 
         </div>
       </div>
+    </div>
+  </div>
 
-      <div id="container-table">
-        <div id="multidimencionalProjectionTable"></div>
+  <!-- Nova estrutura da tabela expansível -->
+  <div id="table-outer-container" class="collapsed">
+    <div id="table-header">
+      <h5><i class="fas fa-table me-2"></i>Tabela de Projeção Multidimensional</h5>
+      <button id="toggle-table-btn" class="btn btn-sm">
+        <i class="fas fa-chevron-up"></i>
+      </button>
+    </div>
+    <div id="table-content-container">
+      <div id="multidimencionalProjectionTable">
+        <!-- Tabela de exemplo -->
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome do Arquivo</th>
+              <th>Versão</th>
+              <th>Tipo de Débito</th>
+              <th>Severidade</th>
+              <th>Localização</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>001</td>
+              <td>TestClass.java</td>
+              <td>1.0.0</td>
+              <td>TODO</td>
+              <td>Média</td>
+              <td>Linha 45</td>
+              <td>2024-01-15</td>
+            </tr>
+            <tr>
+              <td>002</td>
+              <td>DataProcessor.java</td>
+              <td>1.0.1</td>
+              <td>FIXME</td>
+              <td>Alta</td>
+              <td>Linha 128</td>
+              <td>2024-01-16</td>
+            </tr>
+            <tr>
+              <td>003</td>
+              <td>Utils.java</td>
+              <td>1.0.2</td>
+              <td>HACK</td>
+              <td>Baixa</td>
+              <td>Linha 89</td>
+              <td>2024-01-17</td>
+            </tr>
+            <!-- Mais linhas para demonstrar o scroll -->
+            <tr><td>004</td><td>Controller.java</td><td>1.1.0</td><td>TODO</td><td>Média</td><td>Linha 67</td><td>2024-01-18</td></tr>
+            <tr><td>005</td><td>Service.java</td><td>1.1.1</td><td>FIXME</td><td>Alta</td><td>Linha 234</td><td>2024-01-19</td></tr>
+            <tr><td>006</td><td>Repository.java</td><td>1.1.2</td><td>TODO</td><td>Baixa</td><td>Linha 156</td><td>2024-01-20</td></tr>
+            <tr><td>007</td><td>Model.java</td><td>1.2.0</td><td>HACK</td><td>Média</td><td>Linha 78</td><td>2024-01-21</td></tr>
+            <tr><td>008</td><td>Validator.java</td><td>1.2.1</td><td>FIXME</td><td>Alta</td><td>Linha 345</td><td>2024-01-22</td></tr>
+            <tr><td>009</td><td>Helper.java</td><td>1.2.2</td><td>TODO</td><td>Baixa</td><td>Linha 123</td><td>2024-01-23</td></tr>
+            <tr><td>010</td><td>Manager.java</td><td>1.3.0</td><td>HACK</td><td>Média</td><td>Linha 456</td><td>2024-01-24</td></tr>
+            <tr><td>011</td><td>Handler.java</td><td>1.3.1</td><td>FIXME</td><td>Alta</td><td>Linha 789</td><td>2024-01-25</td></tr>
+            <tr><td>012</td><td>Processor.java</td><td>1.3.2</td><td>TODO</td><td>Baixa</td><td>Linha 234</td><td>2024-01-26</td></tr>
+            <tr><td>013</td><td>Factory.java</td><td>1.4.0</td><td>HACK</td><td>Média</td><td>Linha 567</td><td>2024-01-27</td></tr>
+            <tr><td>014</td><td>Builder.java</td><td>1.4.1</td><td>FIXME</td><td>Alta</td><td>Linha 890</td><td>2024-01-28</td></tr>
+            <tr><td>015</td><td>Adapter.java</td><td>1.4.2</td><td>TODO</td><td>Baixa</td><td>Linha 345</td><td>2024-01-29</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -554,6 +712,79 @@
       circle.style.fontSize = `${size * 0.2}px`;
     });
   }
+  
+  // Script melhorado para expandir/recolher a tabela
+  document.addEventListener('DOMContentLoaded', function() {
+      const toggleBtn = document.getElementById('toggle-table-btn');
+      const tableContainer = document.getElementById('table-outer-container');
+      const mainContent = document.getElementById('main-content');
+      const icon = toggleBtn.querySelector('i');
+
+      function toggleTable() {
+          if (tableContainer.classList.contains('collapsed')) {
+              // Expandir
+              tableContainer.classList.remove('collapsed');
+              tableContainer.classList.add('expanded');
+              mainContent.classList.add('table-expanded');
+              icon.classList.remove('fa-chevron-up');
+              icon.classList.add('fa-chevron-down');
+              
+              // Redimensionar visualizações após a animação
+              setTimeout(() => {
+                  if (typeof window.resizeSunburst === 'function') window.resizeSunburst();
+                  if (typeof window.resizePC === 'function') window.resizePC();
+                  if (typeof window.resizeTR === 'function') window.resizeTR();
+                  if (typeof window.resizeMP === 'function') window.resizeMP();
+              }, 400);
+          } else {
+              // Recolher
+              tableContainer.classList.remove('expanded');
+              tableContainer.classList.add('collapsed');
+              mainContent.classList.remove('table-expanded');
+              icon.classList.remove('fa-chevron-down');
+              icon.classList.add('fa-chevron-up');
+              
+              // Redimensionar visualizações após a animação
+              setTimeout(() => {
+                  if (typeof window.resizeSunburst === 'function') window.resizeSunburst();
+                  if (typeof window.resizePC === 'function') window.resizePC();
+                  if (typeof window.resizeTR === 'function') window.resizeTR();
+                  if (typeof window.resizeMP === 'function') window.resizeMP();
+              }, 400);
+          }
+      }
+
+      toggleBtn.addEventListener('click', toggleTable);
+      
+      // Também permitir clicar no header inteiro para expandir/recolher
+      const tableHeader = document.getElementById('table-header');
+      tableHeader.addEventListener('click', function(e) {
+          if (e.target !== toggleBtn && !toggleBtn.contains(e.target)) {
+              toggleTable();
+          }
+      });
+  });
+  
+  // Script para expandir/recolher a tabela
+  document.addEventListener('DOMContentLoaded', function() {
+      const toggleBtn = document.getElementById('toggle-table-btn');
+      const tableContainer = document.getElementById('table-container-wrapper');
+      const icon = toggleBtn.querySelector('i');
+
+      toggleBtn.addEventListener('click', function() {
+          if (tableContainer.classList.contains('collapsed')) {
+              tableContainer.classList.remove('collapsed');
+              tableContainer.classList.add('expanded');
+              icon.classList.remove('fa-expand');
+              icon.classList.add('fa-compress');
+          } else {
+              tableContainer.classList.remove('expanded');
+              tableContainer.classList.add('collapsed');
+              icon.classList.remove('fa-compress');
+              icon.classList.add('fa-expand');
+          }
+      });
+  });
 
   // Configuração inicial
 document.addEventListener('DOMContentLoaded', function() {
@@ -650,7 +881,6 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 </script>
 
-<!-- Scripts de visualização -->
 <script src="vis_bckp/sidebar.js"></script>
 <script src="vis_bckp/tr.js"></script>
 <script src="vis_bckp/sb.js"></script>

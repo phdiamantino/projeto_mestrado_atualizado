@@ -1,4 +1,4 @@
-const MARGIN3 = {LEFT: 10, RIGHT: 40, TOP: 0, BOTTOM: 5}; 
+const MARGIN3 = {LEFT: 30, RIGHT: 40, TOP: 0, BOTTOM: 5}; 
 let WIDTH3, HEIGHT3;
 let selectedGroup = 'jUnit';
 let gTR; 
@@ -10,11 +10,7 @@ let xAxis = null;
 
 // Add SVG
 const svgTR = d3.select("#themeRiver").append("svg")
-    .classed("svg-container", true)
-    .attr("preserveAspectRatio", "xMinYMin meet");
-
-gTR = svgTR.append("g")
-    .attr("transform", `translate(${MARGIN3.LEFT},${MARGIN3.TOP})`);
+    .classed("svg-container", true);
 
 function updateTRDimensions() {
     const container = document.getElementById("themeRiver");
@@ -23,7 +19,7 @@ function updateTRDimensions() {
         return;
     }
     
-    // Calcula as novas dimensões baseadas no container atual
+    // Calcula as novas dimensÃµes baseadas no container atual
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight;
     
@@ -33,33 +29,23 @@ function updateTRDimensions() {
     // Atualiza o SVG principal
     svgTR
         .attr("width", containerWidth)
-        .attr("height", containerHeight)
-        .attr("viewBox", `0 0 ${containerWidth} ${containerHeight}`)
-        .attr("preserveAspectRatio", "xMidYMin meet");
+        .attr("height", containerHeight);
     
     // Remove e recria o grupo principal para garantir limpeza completa
-    gTR.remove();
+    if (gTR) {
+        gTR.remove();
+    }
     gTR = svgTR.append("g")
         .attr("transform", `translate(${MARGIN3.LEFT},${MARGIN3.TOP})`);
+
+    // Atualiza a posiÃ§Ã£o da barra vertical
+    d3.select(".vertical")
+        .style("height", `${containerHeight}px`);
     
-    updateTimeYearPosition();
-    
-    // Redesenha o gráfico se houver dados
+    // Redesenha o grÃ¡fico se houver dados
     if (window.currentTRData) {
         updateTR(selectedGroup);
     }
-}
-
-function updateTimeYearPosition() {
-    const container = document.getElementById("themeRiver");
-    if (!container) return;
-    
-    WIDTH3 = Math.max(100, container.clientWidth - MARGIN3.LEFT - MARGIN3.RIGHT);
-    HEIGHT3 = Math.max(100, container.clientHeight - MARGIN3.TOP - MARGIN3.BOTTOM);
-    
-    d3.select(".time-year-text")
-        .attr("x", WIDTH3-450)
-        .attr("y", HEIGHT3-10);
 }
 
 var tooltipTR = d3.select("#themeRiver")
@@ -150,21 +136,13 @@ function nthMostCommon(str, amount) {
     for (var i = 0; i < wordsArray.length; i++) {
         wordOccurrences['_'+wordsArray[i]] = (wordOccurrences['_'+wordsArray[i]] || 0) + 1;
     }
-    var result = Object.keys(wordOccurrences).reduce(function(acc, currentKey) {
-        for (var i = 0; i < amount; i++) {
-            if (!acc[i]) {
-                acc[i] = currentKey.slice(1, currentKey.length);
-                break;
-            } else if (acc[i].occurences < wordOccurrences[currentKey]) {
-                acc.splice(i, currentKey.slice(1, currentKey.length));
-                if (acc.length > amount)
-                    acc.pop();
-                break;
-            }
-        }
-        return acc;
-    }, []);
-    return result;
+    var wordCount = Object.keys(wordOccurrences).map(function(key) {
+        return { word: key.slice(1), count: wordOccurrences[key] };
+    }).sort(function(a, b) {
+        return b.count - a.count;
+    });
+
+    return wordCount.slice(0, amount).map(d => d.word);
 }
 
 // Data Loading and Initialization
@@ -176,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         window.currentTRData = dataTR;
-        updateTRDimensions(); // Inicializa com as dimensões corretas
+        updateTRDimensions(); // Inicializa com as dimensÃµes corretas
         
         const selectRep = document.getElementById('selectRep');
         if (selectRep) {
@@ -231,12 +209,12 @@ function updateTR(selectedGroup) {
         return;
     }
 
-    // 🔧 Normalize o valor para comparação consistente
+    // ðŸ”§ Normalize o valor para comparaÃ§Ã£o consistente
     const group = selectedGroup.trim().toLowerCase();
 
     console.log('Updating Theme River for group:', group);
 
-    // Limpa visualização anterior
+    // Limpa visualizaÃ§Ã£o anterior
     gTR.selectAll("*").remove();
     d3.selectAll(".myArea").remove();
     d3.select(".vertical").style("opacity", 0);
@@ -259,15 +237,15 @@ function updateTR(selectedGroup) {
         yBar = d3.scaleLinear()
             .domain([0, 700])
             .range([HEIGHT3 * 0.68, 0]);
-        console.log('✔️ Selected jUnit data, records:', dataflag.length);
+        console.log('âœ”ï¸ Selected jUnit data, records:', dataflag.length);
     } else if (group === 'apache') {
         dataflag = window.currentTRData.slice(1449);
         yBar = d3.scaleLinear()
             .domain([0, 7000])
             .range([HEIGHT3 * 0.8, 0]);
-        console.log('✔️ Selected Apache data, records:', dataflag.length);
+        console.log('âœ”ï¸ Selected Apache data, records:', dataflag.length);
     } else {
-        console.warn('❌ Unknown selectedGroup:', selectedGroup);
+        console.warn('âŒ Unknown selectedGroup:', selectedGroup);
         return;
     }
 
@@ -277,11 +255,11 @@ function updateTR(selectedGroup) {
         customSelect.value = 'Quintil';
     }
 
-    // Atualiza a visualização com os dados corretos
-    console.log(`📊 Updating visualization with group: ${customSelect.value} data length: ${dataflag.length}`);
+    // Atualiza a visualizaÃ§Ã£o com os dados corretos
+    console.log(`Updating visualization with group: ${customSelect.value} data length: ${dataflag.length}`);
     updateallTR(dataflag);
 
-    console.log(`🎯 Drawing initial graph for group: ${customSelect.value} with selectedGroup: ${group}`);
+    console.log(`Drawing initial graph for group: ${customSelect.value} with selectedGroup: ${group}`);
 }
 
 // Complete Visualization Update
@@ -358,7 +336,7 @@ window.updateallTR = function(dataS) {
         // Scales
         var xScale = d3.scaleTime()
             .domain(d3.extent(dataS, d => d.date))
-            .range([0, WIDTH3]);
+            .range([0, WIDTH3 * 0.9]);
         
         var yScale = d3.scaleLinear()
             .domain([d3.min(stackedData, l => d3.min(l, d => d[0])),
@@ -375,8 +353,8 @@ window.updateallTR = function(dataS) {
         gTR.append("text")
             .attr("class", "time-year-text")
             .attr("text-anchor", "end")
-            .attr("x", "8vh")
-            .attr("y", HEIGHT3 * 0.70 + 15) 
+            .attr("x", WIDTH3)
+            .attr("y", HEIGHT3 * 0.85 + 30) 
             .style("font-size", "12px")
             .text("Time (Year)");
 
@@ -427,7 +405,7 @@ window.updateallTR = function(dataS) {
             var resultwords = d[id].data.values[i].values.map(s => s['resultwords']);
             var result_cleaned = resultwords.filter(val => val).join(", ").split(",");
 
-            // Verifica qual opção está selecionada
+            // Verifica qual opÃ§Ã£o estÃ¡ selecionada
             var selectedOption = d3.select('input[name="colorButton"]:checked').node();
             var optionValue = selectedOption ? selectedOption.value : 'words';
             
@@ -651,7 +629,7 @@ window.updateallTR = function(dataS) {
                     .style("top", (y - 15) + "px")
                     .style("display", "block");
                 
-                // Cálculo dos valores
+                // CÃ¡lculo dos valores
                 var id = stackedBar.length - 1;
                 var all = stackedBar[id][0][1];
                 var elements = document.querySelectorAll(':hover');
@@ -713,4 +691,3 @@ window.resizeTR = function() {
 
 // Initialize dimensions
 updateTRDimensions();
-
